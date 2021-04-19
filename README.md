@@ -4,7 +4,7 @@ Batch converts images to webp and resize them for responsive web.
 The script renames all images with random UUID, resize the images (with longest border) to 500, 1000, 1500 and 2000, then convert them to webp. Finally it moves the original in a folder, the minified jpegs in another folder, and the webp in another folder.
 
 ## Install
-Simply download the script and run it in the Terminal.
+Simply download the script and run it in the Terminal. The script will manage to install its required dependencies (on Mac).
 
 ***This application is build for MacOS and will likely not work on Linux due to its dependecy on Homebrew***
 
@@ -91,3 +91,13 @@ And the file *album.json* would contain the following :
    ]
 }
 ```
+
+## Dependencies
+
+1. Homebrew
+2. NodeJS
+3. NPM
+4. coreutils
+5. ImageMagick
+6. (*embedded*) spinner.sh
+7. webp-converter-cli

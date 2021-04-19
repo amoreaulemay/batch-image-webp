@@ -1,0 +1,242 @@
+#!/bin/bash
+
+# Author: Tasos Latsas
+
+# spinner.sh
+#
+# Display an awesome 'spinner' while running your long shell commands
+#
+# Do *NOT* call _spinner function directly.
+# Use {start,stop}_spinner wrapper functions
+
+function _spinner() {
+    # $1 start/stop
+    #
+    # on start: $2 display message
+    # on stop : $2 process exit status
+    #           $3 spinner function pid (supplied from stop_spinner)
+
+    local on_success="DONE"
+    local on_fail="FAIL"
+    local white="\e[37m"
+    local green="\e[32m"
+    local red="\e[31m"
+    local nc="\e[0m"
+
+    case $1 in
+        start)
+            # calculate the column where spinner and status msg will be displayed
+            let column=$(tput cols)-${#2}-8
+            # display message and position the cursor in $column column
+            echo -ne ${2}
+            printf "%${column}s"
+
+            # start spinner
+            i=1
+            sp='\|/-'
+            delay=${SPINNER_DELAY:-0.15}
+
+            while :
+            do
+                printf "\b${sp:i++%${#sp}:1}"
+                sleep $delay
+            done
+            ;;
+        stop)
+            if [[ -z ${3} ]]; then
+                echo "spinner is not running.."
+                exit 1
+            fi
+
+            kill $3 > /dev/null 2>&1
+
+            # inform the user uppon success or failure
+            # echo -en "\b["
+            if [[ $2 -eq 0 ]]; then
+                # echo -en "${green}${on_success}${nc}"
+                printf "${green}${on_success}${nc}\n"
+            else
+                # echo -en "${red}${on_fail}${nc}"
+                printf "${red}${on_fail}${nc}\n"
+            fi
+            echo -e "]"
+            ;;
+        *)
+            echo "invalid argument, try {start/stop}"
+            exit 1
+            ;;
+    esac
+}
+
+function start_spinner {
+    # $1 : msg to display
+    _spinner "start" "${1}" &
+    # set global spinner pid
+    _sp_pid=$!
+    disown
+}
+
+function stop_spinner {
+    # $1 : command exit status
+    _spinner "stop" $1 $_sp_pid
+    unset _sp_pid
+}
+
+# Copyright (c) 2021 Alexandre Moreau-Lemay
+
+clear
+printf "This program will convert jpeg in a provided directory to webp, then make two directories (if they don't already exist) - jpeg and webp - and move the files according to their extensions.\n"
+
+# 1. Check if Homebrew is installed
+start_spinner "1. Making sure HomeBrew is installed."
+which -s brew
+if [[ $? != 0 ]] ; then
+    # Install Homebrew
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+else
+    brew update
+fi
+stop_spinner $?
+
+# 2. Check if ImageMagick is installed
+start_spinner "2. Making sure ImageMagick is installed."
+if brew ls --versions imagemagick > /dev/null; then
+    printf "\e[32m    ImageMagick is installed.\n\e[39m"
+else
+    brew install imagemagick
+fi
+stop_spinner $?
+
+# 3. Check if coreutils is installed
+start_spinner "3. Making sure coreutils is installed."
+if brew ls --versions coreutils > /dev/null; then
+    printf "\e[32m    coreutils is installed.\n\e[39m"
+else
+    brew install coreutils
+fi
+stop_spinner $?
+
+# 4. Make sure NPM is installed
+start_spinner "4. Making sure NodeJS is installed."
+if which node > /dev/null
+    then
+        printf "\e[32m    NodeJS is installed, going to the next step.\n\e[39m"
+    else
+        printf "\e[31m    You first need to install NodeJS.\n\e[39m"
+        brew install node
+fi
+stop_spinner $?
+
+# 5. Make sure the jpeg converter script is installed
+printf "5. Making sure the npm dependecies are installed, and installing them if not. This step might require administrative priviledges (enter your password if requested).\n"
+npm list -g | grep webp-converter-cli || sudo npm install -g webp-converter-cli
+
+# 6. Getting the path of the conversion
+if [ $# -eq 0 ]; then
+    printf "6. Please enter the path for the directory with the files.\n"
+    read path
+else
+    path="$1"
+fi
+
+# 7. Check if the directory exists and move to the directory if it does
+if [ ! -d "$path" ]; then
+    printf "\e[31mThe path is invalid!\n"
+    exit 1
+else
+    cd $path
+fi
+
+# 8. Infos about the album
+printf "Enter the name of the album: "
+read ALBUM_NAME
+
+printf "Enter a description for the album: "
+read ALBUM_DESCRIPTION
+
+printf "Enter the year of the album: "
+read ALBUM_YEAR
+
+printf "Enter the city of the album: "
+read ALBUM_CITY
+
+printf "Enter the country of the album: "
+read ALBUM_COUNTRY
+
+# 9. Making the base of the json file
+touch album.json
+printf "{\n" >> album.json
+printf "    \"name\": \"$ALBUM_NAME\",\n" >> album.json
+printf "    \"description\": \"$ALBUM_DESCRIPTION\",\n" >> album.json
+printf "    \"year\": $ALBUM_YEAR,\n" >> album.json
+printf "    \"city\": \"$ALBUM_CITY\",\n" >> album.json
+printf "    \"country\": \"$ALBUM_COUNTRY\",\n" >> album.json
+printf "    \"pictures\": [\n" >> album.json
+
+# 10. Making the two permanent directories and one temporary one
+TEMP=`uuidgen`
+mkdir -p webp
+mkdir -p jpeg
+mkdir -p originals
+mkdir "$TEMP"
+
+# 11. Executing the conversion script
+mv -n *.jpg "$TEMP"/
+mv -n *.jpeg "$TEMP"/ 2>/dev/null
+cd "$TEMP"/
+
+start_spinner 'Resizing files...'
+for FILE in *
+do
+    if [ -f "$FILE" ];then
+		ID=`uuidgen`
+		EXTENSION=${FILE#*.}
+        mv "$FILE" "$ID"."$EXTENSION"
+        NEW_FILE="$ID"."$EXTENSION"
+        printf "        \"$ID\",\n" >> ../album.json
+        convert "$NEW_FILE" -resize 2000x2000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-2000"."$EXTENSION"
+        convert "$NEW_FILE" -resize 1500x1500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1500"."$EXTENSION"
+        convert "$NEW_FILE" -resize 1000x1000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1000"."$EXTENSION"
+        convert "$NEW_FILE" -resize 500x500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-500"."$EXTENSION"
+        mv -n "$NEW_FILE" ../originals/
+	fi
+done
+stop_spinner $?
+
+# 12. Closing the album.json file and removing the last comma and line break from the loop
+if     [ -n "$(tail -c1 ../album.json)" ]    # if the file has not a trailing new line.
+then
+       gtruncate -s-1 ../album.json           # remove one char as the question request.
+else
+       gtruncate -s-2 ../album.json           # remove the last two characters
+       echo "" >> ../album.json              # add the trailing new line back
+fi
+
+printf "    ],\n" >> ../album.json
+printf "    \"sizes\": [\n" >> ../album.json
+printf "        500,\n" >> ../album.json
+printf "        1000,\n" >> ../album.json
+printf "        1500,\n" >> ../album.json
+printf "        2000\n" >> ../album.json
+printf "    ]\n" >> ../album.json
+printf "}" >> ../album.json
+
+# 13. Converting to webp
+webpc -r
+
+# 14. Copying the files in their right directories
+start_spinner 'Copying files...'
+mv -n *.jpg ../jpeg/
+mv -n *.jpeg ../jpeg/ 2>/dev/null
+mv -n *.webp ../webp/
+stop_spinner $?
+
+# 15. Removing the temporary directory
+sleep 5 # To allow the move buffer to clear; caused an issue were the temp directory would not be removed by the end of the script.
+cd ../
+rm -r ./"$TEMP"
+
+# 16. Exiting the script
+clear
+printf "\033[0;32mScript has executed!"
+exit 0

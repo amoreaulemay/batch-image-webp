@@ -18,7 +18,6 @@ function _spinner() {
 
     local on_success="DONE"
     local on_fail="FAIL"
-    local white="\e[37m"
     local green="\e[32m"
     local red="\e[31m"
     local nc="\e[0m"
@@ -28,7 +27,7 @@ function _spinner() {
             # calculate the column where spinner and status msg will be displayed
             let column=$(tput cols)-${#2}-8
             # display message and position the cursor in $column column
-            echo -ne ${2}
+            echo -ne "${2}"
             printf "%${column}s"
 
             # start spinner
@@ -38,8 +37,8 @@ function _spinner() {
 
             while :
             do
-                printf "\b${sp:i++%${#sp}:1}"
-                sleep $delay
+                printf "\b%s" "${sp:i++%${#sp}:1}"
+                sleep "$delay"
             done
             ;;
         stop)
@@ -48,16 +47,14 @@ function _spinner() {
                 exit 1
             fi
 
-            kill $3 > /dev/null 2>&1
+            kill "$3" > /dev/null 2>&1
 
             # inform the user uppon success or failure
             # echo -en "\b["
             if [[ $2 -eq 0 ]]; then
-                # echo -en "${green}${on_success}${nc}"
-                printf "${green}${on_success}${nc}\n"
+                printf "%s\n" "${green}${on_success}${nc}"
             else
-                # echo -en "${red}${on_fail}${nc}"
-                printf "${red}${on_fail}${nc}\n"
+                printf "%s\n" "${red}${on_fail}${nc}"
             fi
             echo -e "]"
             ;;
@@ -78,7 +75,7 @@ function start_spinner {
 
 function stop_spinner {
     # $1 : command exit status
-    _spinner "stop" $1 $_sp_pid
+    _spinner "stop" "$1" $_sp_pid
     unset _sp_pid
 }
 
@@ -90,7 +87,7 @@ printf "This program will convert jpeg in a provided directory to webp, then mak
 # 1. Check if Homebrew is installed
 start_spinner "1. Making sure HomeBrew is installed."
 which -s brew
-if [[ $? != 0 ]] ; then
+if ! which -s brew ; then
     # Install Homebrew
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 else
@@ -134,7 +131,7 @@ npm list -g | grep webp-converter-cli || sudo npm install -g webp-converter-cli
 # 6. Getting the path of the conversion
 if [ $# -eq 0 ]; then
     printf "6. Please enter the path for the directory with the files.\n"
-    read path
+    read -r path
 else
     path="$1"
 fi
@@ -144,56 +141,58 @@ if [ ! -d "$path" ]; then
     printf "\e[31mThe path is invalid!\n"
     exit 1
 else
-    cd $path
+    cd "$path" || exit
 fi
 
 # 8. Infos about the album
 printf "Enter the name of the album: "
-read ALBUM_NAME
+read -r ALBUM_NAME
 
 printf "Enter a description for the album: "
-read ALBUM_DESCRIPTION
+read -r ALBUM_DESCRIPTION
 
 printf "Enter the year of the album: "
-read ALBUM_YEAR
+read -r ALBUM_YEAR
 
 printf "Enter the city of the album: "
-read ALBUM_CITY
+read -r ALBUM_CITY
 
 printf "Enter the country of the album: "
-read ALBUM_COUNTRY
+read -r ALBUM_COUNTRY
 
 # 9. Making the base of the json file
 touch album.json
-printf "{\n" >> album.json
-printf "    \"name\": \"$ALBUM_NAME\",\n" >> album.json
-printf "    \"description\": \"$ALBUM_DESCRIPTION\",\n" >> album.json
-printf "    \"year\": $ALBUM_YEAR,\n" >> album.json
-printf "    \"city\": \"$ALBUM_CITY\",\n" >> album.json
-printf "    \"country\": \"$ALBUM_COUNTRY\",\n" >> album.json
-printf "    \"pictures\": [\n" >> album.json
+{
+    printf "{\n"
+    printf "    \"name\":\"%s\",\n" "$ALBUM_NAME"
+    printf "    \"description\":\"%s\",\n" "$ALBUM_DESCRIPTION"
+    printf "    \"year\":%s,\n" "$ALBUM_YEAR"
+    printf "    \"city\":\"%s\",\n" "$ALBUM_CITY"
+    printf "    \"country\":\"%s\",\n" "$ALBUM_COUNTRY"
+    printf "    \"pictures\":[\n"
+} >> album.json
 
 # 10. Making the two permanent directories and one temporary one
-TEMP=`uuidgen`
+TEMP=$(uuidgen)
 mkdir -p webp
 mkdir -p jpeg
 mkdir -p originals
 mkdir "$TEMP"
 
 # 11. Executing the conversion script
-mv -n *.jpg "$TEMP"/
-mv -n *.jpeg "$TEMP"/ 2>/dev/null
-cd "$TEMP"/
+mv -n ./*.jpg "$TEMP"/
+mv -n ./*.jpeg "$TEMP"/ 2>/dev/null
+cd "$TEMP"/ || exit
 
 start_spinner 'Resizing files...'
 for FILE in *
 do
     if [ -f "$FILE" ];then
-		ID=`uuidgen`
+		ID=$(uuidgen)
 		EXTENSION=${FILE#*.}
         mv "$FILE" "$ID"."$EXTENSION"
         NEW_FILE="$ID"."$EXTENSION"
-        printf "        \"$ID\",\n" >> ../album.json
+        printf "        \"%s\",\n" "$ID" >> ../album.json
         convert "$NEW_FILE" -resize 2000x2000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-2000"."$EXTENSION"
         convert "$NEW_FILE" -resize 1500x1500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1500"."$EXTENSION"
         convert "$NEW_FILE" -resize 1000x1000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1000"."$EXTENSION"
@@ -212,23 +211,25 @@ else
        echo "" >> ../album.json              # add the trailing new line back
 fi
 
-printf "    ],\n" >> ../album.json
-printf "    \"sizes\": [\n" >> ../album.json
-printf "        500,\n" >> ../album.json
-printf "        1000,\n" >> ../album.json
-printf "        1500,\n" >> ../album.json
-printf "        2000\n" >> ../album.json
-printf "    ]\n" >> ../album.json
-printf "}" >> ../album.json
+{
+    printf "    ],\n"
+    printf "    \"sizes\":[\n"
+    printf "        500,\n"
+    printf "        1000,\n"
+    printf "        1500,\n"
+    printf "        2000\n"
+    printf "    ]\n"
+    printf "}"
+} >> ../album.json
 
 # 13. Converting to webp
 webpc -r
 
 # 14. Copying the files in their right directories
 start_spinner 'Copying files...'
-mv -n *.jpg ../jpeg/
-mv -n *.jpeg ../jpeg/ 2>/dev/null
-mv -n *.webp ../webp/
+mv -n ./*.jpg ../jpeg/
+mv -n ./*.jpeg ../jpeg/ 2>/dev/null
+mv -n ./*.webp ../webp/
 stop_spinner $?
 
 # 15. Removing the temporary directory

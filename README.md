@@ -94,10 +94,10 @@ And the file *album.json* would contain the following :
 
 ## Dependencies
 
-1. [Homebrew] (https://brew.sh/)
-2. [NodeJS] (https://nodejs.org/en/)
-3. [NPM] (https://www.npmjs.com/)
+1. [Homebrew](https://brew.sh/)
+2. [NodeJS](https://nodejs.org/en/)
+3. [NPM](https://www.npmjs.com/)
 4. [coreutils] (https://formulae.brew.sh/formula/coreutils)
-5. [ImageMagick] (https://formulae.brew.sh/formula/imagemagick#default)
-6. (*embedded*) [spinner.sh] (https://github.com/tlatsas/bash-spinner/blob/master/spinner.sh)
-7. [webp-converter-cli] (https://www.npmjs.com/package/webp-converter-cli)
+5. [ImageMagick](https://formulae.brew.sh/formula/imagemagick#default)
+6. (*embedded*) [spinner.sh](https://github.com/tlatsas/bash-spinner/blob/master/spinner.sh)
+7. [webp-converter-cli](https://www.npmjs.com/package/webp-converter-cli)

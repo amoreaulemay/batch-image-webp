@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# pragma SPINNER.SH
 # Author: Tasos Latsas
 
 # spinner.sh
@@ -25,7 +26,7 @@ function _spinner() {
     case $1 in
         start)
             # calculate the column where spinner and status msg will be displayed
-            let column=$(tput cols)-${#2}-8
+            column=$(($(tput cols)-${#2}-8))
             # display message and position the cursor in $column column
             echo -ne "${2}"
             printf "%${column}s"
@@ -37,7 +38,7 @@ function _spinner() {
 
             while :
             do
-                printf "\b%s" "${sp:i++%${#sp}:1}"
+                printf "\b${sp:i++%${#sp}:1}"
                 sleep "$delay"
             done
             ;;
@@ -52,11 +53,11 @@ function _spinner() {
             # inform the user uppon success or failure
             # echo -en "\b["
             if [[ $2 -eq 0 ]]; then
-                printf "%s\n" "${green}${on_success}${nc}"
+                printf "${green}%s${nc}" "${on_success}"
             else
-                printf "%s\n" "${red}${on_fail}${nc}"
+                printf "${red}%s${nc}" "${on_fail}"
             fi
-            echo -e "]"
+            printf "]\n"
             ;;
         *)
             echo "invalid argument, try {start/stop}"
@@ -79,12 +80,15 @@ function stop_spinner {
     unset _sp_pid
 }
 
+# pragma MAIN PROGRAM
 # Copyright (c) 2021 Alexandre Moreau-Lemay
+# Author : Alexandre Moreau-Lemay
+# License : AGPL-3.0 License
 
 clear
 printf "This program will convert jpeg in a provided directory to webp, then make two directories (if they don't already exist) - jpeg and webp - and move the files according to their extensions.\n"
 
-# 1. Check if Homebrew is installed
+# pragma 1. Check if Homebrew is installed
 start_spinner "1. Making sure HomeBrew is installed."
 which -s brew
 if ! which -s brew ; then
@@ -92,10 +96,11 @@ if ! which -s brew ; then
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 else
     brew update
+    brew upgrade
 fi
 stop_spinner $?
 
-# 2. Check if ImageMagick is installed
+# pragma 2. Check if ImageMagick is installed
 start_spinner "2. Making sure ImageMagick is installed."
 if brew ls --versions imagemagick > /dev/null; then
     printf "\e[32m    ImageMagick is installed.\n\e[39m"
@@ -104,7 +109,7 @@ else
 fi
 stop_spinner $?
 
-# 3. Check if coreutils is installed
+# pragma 3. Check if coreutils is installed
 start_spinner "3. Making sure coreutils is installed."
 if brew ls --versions coreutils > /dev/null; then
     printf "\e[32m    coreutils is installed.\n\e[39m"
@@ -113,7 +118,7 @@ else
 fi
 stop_spinner $?
 
-# 4. Make sure NPM is installed
+# pragma 4. Make sure NPM is installed
 start_spinner "4. Making sure NodeJS is installed."
 if which node > /dev/null
     then
@@ -124,11 +129,11 @@ if which node > /dev/null
 fi
 stop_spinner $?
 
-# 5. Make sure the jpeg converter script is installed
+# pragma 5. Make sure the jpeg converter script is installed
 printf "5. Making sure the npm dependecies are installed, and installing them if not. This step might require administrative priviledges (enter your password if requested).\n"
 npm list -g | grep webp-converter-cli || sudo npm install -g webp-converter-cli
 
-# 6. Getting the path of the conversion
+# pragma 6. Getting the path of the conversion
 if [ $# -eq 0 ]; then
     printf "6. Please enter the path for the directory with the files.\n"
     read -r path
@@ -136,7 +141,7 @@ else
     path="$1"
 fi
 
-# 7. Check if the directory exists and move to the directory if it does
+# pragma 7. Check if the directory exists and move to the directory if it does
 if [ ! -d "$path" ]; then
     printf "\e[31mThe path is invalid!\n"
     exit 1
@@ -144,7 +149,7 @@ else
     cd "$path" || exit
 fi
 
-# 8. Infos about the album
+# pragma 8. Infos about the album
 printf "Enter the name of the album: "
 read -r ALBUM_NAME
 
@@ -160,7 +165,60 @@ read -r ALBUM_CITY
 printf "Enter the country of the album: "
 read -r ALBUM_COUNTRY
 
-# 9. Making the base of the json file
+# pragma 9. Select the album cover
+function album_cover() {
+    TEMP=true
+    while "$TEMP"
+    do
+        printf "Please provide the name of the file (including the extension) : "
+        read -r COVER_FILE_NAME
+        if [ ! -f "$COVER_FILE_NAME" ]; then
+            printf "Error: The file name provided does not exist. Would you like to try again? [y/n] : "
+            read -r ALBUM_COVER_TRY_AGAIN
+            if [ "$ALBUM_COVER_TRY_AGAIN" = "n" ] || [ "$ALBUM_COVER_TRY_AGAIN" = "N" ]; then
+                printf "The program will therefore choose a random file.\n"
+                random_album_cover
+                TEMP=false
+            fi
+        else
+            TEMP=false
+        fi
+    done
+}
+
+function random_album_cover() {
+    COVER_FILE_NAME=$(find . -maxdepth 1 | gshuf -n 1 | cut -c 3-)
+}
+
+TEMP_T=true
+while "$TEMP_T"
+do
+    printf "Do you wish to set a cover image for the album? If none is set, it will be randomly generated. [y/n] : "
+    read -r _SET_ALBUM_COVER
+    case "$_SET_ALBUM_COVER" in
+        "y")
+            album_cover
+            TEMP_T=false
+            ;;
+        "Y")
+            album_cover
+            TEMP_T=false
+            ;;
+        "n")
+            random_album_cover
+            TEMP_T=false
+            ;;
+        "N")
+            random_album_cover
+            TEMP_T=false
+            ;;
+        *)
+            printf "Invalid input! Please try again.\n"
+            ;;
+    esac
+done
+
+# pragma 10. Making the base of the json file
 touch album.json
 {
     printf "{\n"
@@ -172,14 +230,14 @@ touch album.json
     printf "    \"pictures\":[\n"
 } >> album.json
 
-# 10. Making the two permanent directories and one temporary one
+# pragma 11. Making the two permanent directories and one temporary one
 TEMP=$(uuidgen)
 mkdir -p webp
 mkdir -p jpeg
 mkdir -p originals
 mkdir "$TEMP"
 
-# 11. Executing the conversion script
+# pragma 12. Executing the conversion script
 mv -n ./*.jpg "$TEMP"/
 mv -n ./*.jpeg "$TEMP"/ 2>/dev/null
 cd "$TEMP"/ || exit
@@ -188,21 +246,24 @@ start_spinner 'Resizing files...'
 for FILE in *
 do
     if [ -f "$FILE" ];then
-		ID=$(uuidgen)
-		EXTENSION=${FILE#*.}
+        ID=$(uuidgen)
+        EXTENSION=${FILE#*.}
+        if [ "$FILE" = "$COVER_FILE_NAME" ]; then
+            COVER_ID="$ID"
+        fi
         mv "$FILE" "$ID"."$EXTENSION"
         NEW_FILE="$ID"."$EXTENSION"
         printf "        \"%s\",\n" "$ID" >> ../album.json
-        convert "$NEW_FILE" -resize 2000x2000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-2000"."$EXTENSION"
-        convert "$NEW_FILE" -resize 1500x1500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1500"."$EXTENSION"
-        convert "$NEW_FILE" -resize 1000x1000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1000"."$EXTENSION"
-        convert "$NEW_FILE" -resize 500x500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-500"."$EXTENSION"
+        convert "$NEW_FILE" -resize 2000x2000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-2000.$EXTENSION"
+        convert "$NEW_FILE" -resize 1500x1500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1500.$EXTENSION"
+        convert "$NEW_FILE" -resize 1000x1000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1000.$EXTENSION"
+        convert "$NEW_FILE" -resize 500x500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-500.$EXTENSION"
         mv -n "$NEW_FILE" ../originals/
-	fi
+    fi
 done
 stop_spinner $?
 
-# 12. Closing the album.json file and removing the last comma and line break from the loop
+# pragma 13. Closing the album.json file and removing the last comma and line break from the loop
 if     [ -n "$(tail -c1 ../album.json)" ]    # if the file has not a trailing new line.
 then
        gtruncate -s-1 ../album.json           # remove one char as the question request.
@@ -213,6 +274,7 @@ fi
 
 {
     printf "    ],\n"
+    printf "    \"cover\":\"%s\",\n" "$COVER_ID"
     printf "    \"sizes\":[\n"
     printf "        500,\n"
     printf "        1000,\n"
@@ -222,22 +284,22 @@ fi
     printf "}"
 } >> ../album.json
 
-# 13. Converting to webp
+# pragma 14. Converting to webp
 webpc -r
 
-# 14. Copying the files in their right directories
+# pragma 15. Copying the files in their right directories
 start_spinner 'Copying files...'
 mv -n ./*.jpg ../jpeg/
 mv -n ./*.jpeg ../jpeg/ 2>/dev/null
 mv -n ./*.webp ../webp/
 stop_spinner $?
 
-# 15. Removing the temporary directory
+# pragma 16. Removing the temporary directory
 sleep 5 # To allow the move buffer to clear; caused an issue were the temp directory would not be removed by the end of the script.
 cd ../
 rm -r ./"$TEMP"
 
-# 16. Exiting the script
+# pragma 17. Exiting the script
 clear
-printf "\033[0;32mScript has executed!"
+printf "\033[0;32mScript has executed!\n"
 exit 0

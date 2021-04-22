@@ -21,6 +21,9 @@ Or you can provide the path as an argument
 bash jpeg2webp /path/to/folder
 ```
 
+## Word of Caution
+This script work in ***bash only***. As it currently is, the script fails in a zsh interpreter. This is currently being investigated.
+
 ## Example
 
 This is before the script

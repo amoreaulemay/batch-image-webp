@@ -86,6 +86,7 @@ And the file *album.json* would contain the following :
       "FBC87CFF-BF75-4017-86B0-CE69910C0670",
       "6BA43107-8AAC-497A-83F9-5D13A1AEF29D"
    ],
+   "cover":"9F721D48-2DF3-4570-8744-0790C3577454",
    "sizes":[
       500,
       1000,

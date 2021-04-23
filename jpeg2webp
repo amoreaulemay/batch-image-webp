@@ -13,7 +13,7 @@ function _spinner() {
             # calculate the column where spinner and status msg will be displayed
             column=$(($(tput cols)-${#2}-8))
             # display message and position the cursor in $column column
-            echo -ne "${2}"
+            printf "%b" "${2}"
             printf "%${column}s"
 
             # start spinner
@@ -29,14 +29,14 @@ function _spinner() {
             ;;
         stop)
             if [[ -z ${3} ]]; then
-                echo "spinner is not running.."
+                printf "Spinner is not running.\n"
                 exit 1
             fi
 
             kill "$3" > /dev/null 2>&1
 
             # inform the user uppon success or failure
-            printf "["
+            printf "\n["
             if [[ $2 -eq 0 ]]; then
                 printf "%bDONE%b" "${green}" "${nc}"
             else
@@ -75,48 +75,40 @@ printf "This program will convert jpeg in a provided directory to webp, then mak
 
 # pragma 1. Check if Homebrew is installed
 start_spinner "1. Making sure HomeBrew is installed."
-which -s brew
-if ! which -s brew ; then
+if ! which -s brew > /dev/null ; then
     # Install Homebrew
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-else
-    brew update
-    brew upgrade
 fi
 stop_spinner $?
 
 # pragma 2. Check if ImageMagick is installed
 start_spinner "2. Making sure ImageMagick is installed."
-if brew ls --versions imagemagick > /dev/null; then
-    printf "\e[32m    ImageMagick is installed.\n\e[39m"
-else
+if ! brew ls --versions imagemagick > /dev/null; then
     brew install imagemagick
 fi
 stop_spinner $?
 
 # pragma 3. Check if coreutils is installed
 start_spinner "3. Making sure coreutils is installed."
-if brew ls --versions coreutils > /dev/null; then
-    printf "\e[32m    coreutils is installed.\n\e[39m"
-else
+if ! brew ls --versions coreutils > /dev/null; then
     brew install coreutils
 fi
 stop_spinner $?
 
 # pragma 4. Make sure NPM is installed
 start_spinner "4. Making sure NodeJS is installed."
-if which node > /dev/null
-    then
-        printf "\e[32m    NodeJS is installed, going to the next step.\n\e[39m"
-    else
-        printf "\e[31m    You first need to install NodeJS.\n\e[39m"
-        brew install node
+if ! which node > /dev/null ; then
+    brew install node
 fi
 stop_spinner $?
 
 # pragma 5. Make sure the jpeg converter script is installed
-printf "5. Making sure the npm dependecies are installed, and installing them if not. This step might require administrative priviledges (enter your password if requested).\n"
-npm list -g | grep webp-converter-cli || sudo npm install -g webp-converter-cli
+start_spinner "5. Making sure the webp converter is installed."
+if ! npm list -g | grep webp-converter-cli > /dev/null ; then
+    printf "The webp converter is not installed. To install it, please enter your password."
+    sudo npm install -g webp-converter-cli
+fi
+stop_spinner $?
 
 # pragma 6. Getting the path of the conversion
 if [ $# -eq 0 ]; then

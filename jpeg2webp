@@ -3,8 +3,6 @@
 # pragma SPINNER.SH
 # Author: Tasos Latsas
 
-# spinner.sh
-#
 # Display an awesome 'spinner' while running your long shell commands
 #
 # Do *NOT* call _spinner function directly.

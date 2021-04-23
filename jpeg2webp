@@ -95,7 +95,7 @@ if ! brew ls --versions coreutils > /dev/null; then
 fi
 stop_spinner $?
 
-# pragma 4. Make sure NPM is installed
+# pragma 4. Make sure NodeJS (with NPM) is installed
 start_spinner "4. Making sure NodeJS is installed."
 if ! which node > /dev/null ; then
     brew install node
@@ -105,7 +105,7 @@ stop_spinner $?
 # pragma 5. Make sure the jpeg converter script is installed
 start_spinner "5. Making sure the webp converter is installed."
 if ! npm list -g | grep webp-converter-cli > /dev/null ; then
-    printf "The webp converter is not installed. To install it, please enter your password."
+    printf "The webp converter is not installed. To install it, please enter your password.\n"
     sudo npm install -g webp-converter-cli
 fi
 stop_spinner $?
@@ -144,8 +144,7 @@ read -r ALBUM_COUNTRY
 
 # pragma 9. Select the album cover
 function album_cover() {
-    TEMP=true
-    while "$TEMP"
+    while :
     do
         printf "Please provide the name of the file (including the extension) : "
         read -r COVER_FILE_NAME
@@ -155,10 +154,10 @@ function album_cover() {
             if [ "$ALBUM_COVER_TRY_AGAIN" = "n" ] || [ "$ALBUM_COVER_TRY_AGAIN" = "N" ]; then
                 printf "The program will therefore choose a random file.\n"
                 random_album_cover
-                TEMP=false
+                break
             fi
         else
-            TEMP=false
+            break
         fi
     done
 }
@@ -167,27 +166,26 @@ function random_album_cover() {
     COVER_FILE_NAME=$(find . -maxdepth 1 | gshuf -n 1 | cut -c 3-)
 }
 
-TEMP_T=true
-while "$TEMP_T"
+while :
 do
     printf "Do you wish to set a cover image for the album? If none is set, it will be randomly generated. [y/n] : "
     read -r _SET_ALBUM_COVER
     case "$_SET_ALBUM_COVER" in
         "y")
             album_cover
-            TEMP_T=false
+            break
             ;;
         "Y")
             album_cover
-            TEMP_T=false
+            break
             ;;
         "n")
             random_album_cover
-            TEMP_T=false
+            break
             ;;
         "N")
             random_album_cover
-            TEMP_T=false
+            break
             ;;
         *)
             printf "Invalid input! Please try again.\n"

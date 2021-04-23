@@ -4,8 +4,6 @@
 # Author: Tasos Latsas
 
 function _spinner() {
-    local on_success="DONE"
-    local on_fail="FAIL"
     local green="\e[32m"
     local red="\e[31m"
     local nc="\e[0m"
@@ -38,16 +36,16 @@ function _spinner() {
             kill "$3" > /dev/null 2>&1
 
             # inform the user uppon success or failure
-            # echo -en "\b["
+            printf "["
             if [[ $2 -eq 0 ]]; then
-                printf "${green}%s${nc}" "${on_success}"
+                printf "%bDONE%b" "${green}" "${nc}"
             else
-                printf "${red}%s${nc}" "${on_fail}"
+                printf "%bFAIL%b" "${red}" "${nc}"
             fi
             printf "]\n"
             ;;
         *)
-            echo "invalid argument, try {start/stop}"
+            echo "Invalid argument, try {start/stop}"
             exit 1
             ;;
     esac
@@ -251,12 +249,15 @@ done
 stop_spinner $?
 
 # pragma 13. Closing the album.json file and removing the last comma and line break from the loop
-if     [ -n "$(tail -c1 ../album.json)" ]    # if the file has not a trailing new line.
-then
-       gtruncate -s-1 ../album.json           # remove one char as the question request.
+if [ -n "$(tail -c1 ../album.json)" ]; then
+    # If the file has not a trailing new line.
+    # Remove one char as the question request.
+    gtruncate -s-1 ../album.json           
 else
-       gtruncate -s-2 ../album.json           # remove the last two characters
-       echo "" >> ../album.json              # add the trailing new line back
+    # Remove the last two characters.
+    gtruncate -s-2 ../album.json
+    # Add the trailing new line back.
+    echo "" >> ../album.json
 fi
 
 {
@@ -282,7 +283,10 @@ mv -n ./*.webp ../webp/
 stop_spinner $?
 
 # pragma 16. Removing the temporary directory
-sleep 5 # To allow the move buffer to clear; caused an issue were the temp directory would not be removed by the end of the script.
+
+# Added a sleep 5 because without it the script sometimes causes an issue where the temporary directory would not be deleted.
+sleep 5
+
 cd ../
 rm -r ./"$TEMP"
 

@@ -7,6 +7,8 @@ The script renames all images with random UUID, resize the images (with longest 
 Simply download the script and run it in the Terminal. The script will manage to install its required dependencies (on Mac).
 
 ***This application is build for MacOS and will likely not work on Linux due to its dependecy on Homebrew***
+### Update on Linux Compatibility
+As of v1.1.1, the script does not run on Ubuntu 21.04 (at least in my tests). Script run into issues trying to install Homebrew. Although I could only test it as a root user on a linode server, so that could be the issue. Check the issue tab for more details, or if you want to contribute.
 
 ## Use
 You can launch the script without argument, the script will ask for the path.

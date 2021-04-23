@@ -3,18 +3,7 @@
 # pragma SPINNER.SH
 # Author: Tasos Latsas
 
-# Display an awesome 'spinner' while running your long shell commands
-#
-# Do *NOT* call _spinner function directly.
-# Use {start,stop}_spinner wrapper functions
-
 function _spinner() {
-    # $1 start/stop
-    #
-    # on start: $2 display message
-    # on stop : $2 process exit status
-    #           $3 spinner function pid (supplied from stop_spinner)
-
     local on_success="DONE"
     local on_fail="FAIL"
     local green="\e[32m"
@@ -36,7 +25,7 @@ function _spinner() {
 
             while :
             do
-                printf "\b${sp:i++%${#sp}:1}"
+                printf "\b%b" "${sp:i++%${#sp}:1}"
                 sleep "$delay"
             done
             ;;

@@ -70,16 +70,23 @@ function stop_spinner {
 # Author : Alexandre Moreau-Lemay
 # License : AGPL-3.0 License
 
+bold=$(tput bold)
+normal=$(tput sgr0)
+
 clear
-printf "This program will convert jpeg in a provided directory to webp, then make two directories (if they don't already exist) - jpeg and webp - and move the files according to their extensions.\n"
+printf "%bBatch WebP converter v.1.1.2%b\n" "$bold" "$normal"
+printf "Copyright (c) Alexandre Moreau-Lemay 2021.\n"
+printf "Released under the AGPLv3 License.\n\n\n"
+sleep 1
 
 # pragma 1. Check if Homebrew is installed
 start_spinner "1. Making sure HomeBrew is installed."
-if ! which -s brew > /dev/null ; then
+if ! which brew > /dev/null ; then
     # Install Homebrew
     ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 stop_spinner $?
+sleep 1
 
 # pragma 2. Check if ImageMagick is installed
 start_spinner "2. Making sure ImageMagick is installed."
@@ -87,6 +94,7 @@ if ! brew ls --versions imagemagick > /dev/null; then
     brew install imagemagick
 fi
 stop_spinner $?
+sleep 1
 
 # pragma 3. Check if coreutils is installed
 start_spinner "3. Making sure coreutils is installed."
@@ -94,31 +102,43 @@ if ! brew ls --versions coreutils > /dev/null; then
     brew install coreutils
 fi
 stop_spinner $?
+sleep 1
 
-# pragma 4. Make sure NodeJS (with NPM) is installed
-start_spinner "4. Making sure NodeJS is installed."
+# pragma 4. Make sure Zenity is installed
+start_spinner "4. Making sure Zenity is installed."
+if ! brew ls --versions zenity > /dev/null; then
+    brew install zenity
+fi
+stop_spinner $?
+sleep 1
+
+# pragma 5. Make sure NodeJS (with NPM) is installed
+start_spinner "5. Making sure NodeJS is installed."
 if ! which node > /dev/null ; then
     brew install node
 fi
 stop_spinner $?
+sleep 1
 
-# pragma 5. Make sure the jpeg converter script is installed
-start_spinner "5. Making sure the webp converter is installed."
+# pragma 6. Make sure the jpeg converter script is installed
+start_spinner "6. Making sure WebP Converter CLI is installed."
 if ! npm list -g | grep webp-converter-cli > /dev/null ; then
     printf "The webp converter is not installed. To install it, please enter your password.\n"
     sudo npm install -g webp-converter-cli
 fi
 stop_spinner $?
+sleep 1
 
-# pragma 6. Getting the path of the conversion
+# pragma 7. Getting the path of the conversion
 if [ $# -eq 0 ]; then
-    printf "6. Please enter the path for the directory with the files.\n"
-    read -r path
+    path=$(zenity --file-selection --directory)
+    # printf "7. Please enter the path for the directory with the files.\n"
+    # read -r path
 else
     path="$1"
 fi
 
-# pragma 7. Check if the directory exists and move to the directory if it does
+# pragma 8. Check if the directory exists and move to the directory if it does
 if [ ! -d "$path" ]; then
     printf "\e[31mThe path is invalid!\n"
     exit 1
@@ -126,7 +146,7 @@ else
     cd "$path" || exit
 fi
 
-# pragma 8. Infos about the album
+# pragma 9. Infos about the album
 printf "Enter the name of the album: "
 read -r ALBUM_NAME
 
@@ -142,7 +162,7 @@ read -r ALBUM_CITY
 printf "Enter the country of the album: "
 read -r ALBUM_COUNTRY
 
-# pragma 9. Select the album cover
+# pragma 10. Select the album cover
 function album_cover() {
     while :
     do
@@ -193,7 +213,7 @@ do
     esac
 done
 
-# pragma 10. Making the base of the json file
+# pragma 11. Making the base of the json file
 touch album.json
 {
     printf "{\n"
@@ -205,14 +225,14 @@ touch album.json
     printf "    \"pictures\":[\n"
 } >> album.json
 
-# pragma 11. Making the two permanent directories and one temporary one
+# pragma 12. Making the two permanent directories and one temporary one
 TEMP=$(uuidgen)
 mkdir -p webp
 mkdir -p jpeg
 mkdir -p originals
 mkdir "$TEMP"
 
-# pragma 12. Executing the conversion script
+# pragma 13. Executing the conversion script
 mv -n ./*.jpg "$TEMP"/
 mv -n ./*.jpeg "$TEMP"/ 2>/dev/null
 cd "$TEMP"/ || exit
@@ -238,7 +258,7 @@ do
 done
 stop_spinner $?
 
-# pragma 13. Closing the album.json file and removing the last comma and line break from the loop
+# pragma 14. Closing the album.json file and removing the last comma and line break from the loop
 if [ -n "$(tail -c1 ../album.json)" ]; then
     # If the file has not a trailing new line.
     # Remove one char as the question request.
@@ -262,17 +282,17 @@ fi
     printf "}"
 } >> ../album.json
 
-# pragma 14. Converting to webp
+# pragma 15. Converting to webp
 webpc -r
 
-# pragma 15. Copying the files in their right directories
+# pragma 16. Copying the files in their right directories
 start_spinner 'Copying files...'
 mv -n ./*.jpg ../jpeg/
 mv -n ./*.jpeg ../jpeg/ 2>/dev/null
 mv -n ./*.webp ../webp/
 stop_spinner $?
 
-# pragma 16. Removing the temporary directory
+# pragma 17. Removing the temporary directory
 
 # Added a sleep 5 because without it the script sometimes causes an issue where the temporary directory would not be deleted.
 sleep 5
@@ -280,7 +300,7 @@ sleep 5
 cd ../
 rm -r ./"$TEMP"
 
-# pragma 17. Exiting the script
+# pragma 18. Exiting the script
 clear
 printf "\033[0;32mScript has executed!\n"
 exit 0

@@ -125,3 +125,8 @@ And the file *album.json* would contain the following :
 1. [ImageMagick](https://formulae.brew.sh/formula/imagemagick#default)
 2. [coreutils](https://www.gnu.org/software/coreutils/)
 3. [spinner.sh](https://github.com/tlatsas/bash-spinner/blob/master/spinner.sh) (*embedded*)
+
+## Dependencies (Windows)
+1. [PowerShell](https://github.com/PowerShell/PowerShell)
+2. [Chocolatey](https://chocolatey.org/)
+3. [ImageMagick](https://formulae.brew.sh/formula/imagemagick#default)

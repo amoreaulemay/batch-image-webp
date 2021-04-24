@@ -74,7 +74,7 @@ bold=$(tput bold)
 normal=$(tput sgr0)
 
 clear
-printf "%bBatch WebP converter v.1.1.2%b\n" "$bold" "$normal"
+printf "%bBatch WebP converter v.1.1.3 - MacOS%b\n" "$bold" "$normal"
 printf "Copyright (c) Alexandre Moreau-Lemay 2021.\n"
 printf "Released under the AGPLv3 License.\n\n\n"
 sleep 1
@@ -140,7 +140,7 @@ fi
 
 # pragma 8. Check if the directory exists and move to the directory if it does
 if [ ! -d "$path" ]; then
-    printf "\e[31mThe path is invalid!\n"
+    printf "\e[31mThe path is invalid!\e[0m\n"
     exit 1
 else
     cd "$path" || exit
@@ -302,5 +302,5 @@ rm -r ./"$TEMP"
 
 # pragma 18. Exiting the script
 clear
-printf "\033[0;32mScript has executed!\n"
+printf "\033[0;32mScript has executed!\e[0m\n"
 exit 0

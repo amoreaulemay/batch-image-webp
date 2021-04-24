@@ -36,7 +36,7 @@ bash jpeg2webp /path/to/folder
 ```
 
 ### Word of Caution
-This script works in ***bash only***. As it currently is, the script fails in a zsh interpreter. This is currently being investigated.
+This script works in ***bash only***. As it currently is, the script fails in a zsh interpreter. ~~This is currently being investigated.~~
 
 ## Example
 

@@ -11,6 +11,7 @@ Simply download the script and run it in the Terminal. The script will manage to
 #### v1.1.3
 Added initial compatibility layer via a dedicated linux script for debian like systems (in subdirectory linux/).
 
+#### v1.1.1
 ~~As of v1.1.1, the script does not run on Ubuntu 21.04 (at least in my tests). Script run into issues trying to install Homebrew. Although I could only test it as a root user on a linode server, so that could be the issue. Check the issue tab for more details, or if you want to contribute.~~
 
 ## Use

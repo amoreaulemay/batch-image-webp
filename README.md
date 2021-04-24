@@ -4,15 +4,23 @@ Batch converts images to webp and resize them for responsive web.
 The script renames all images with random UUID, resize the images (with longest border) to 500, 1000, 1500 and 2000, then convert them to webp. Finally it moves the original in a folder, the minified jpegs in another folder, and the webp in another folder.
 
 ## Install
-Simply download the script and run it in the Terminal. The script will manage to install its required dependencies (on Mac). **This app requires sudo access (so admin only) for the installation of its dependencies. To run it as a regular user, make sure to first install the dependencies required, the script should then run fine. (Check below for all dependencies)**
+### MacOS
+Download the script in the MacOS directory. The script will install its required dependencies on the initial run. **Note :** This app requires sudo access to install its dependencies. If you want to run it as a non-admin user, you must first ask the sys-admin to install the required dependencies. See below for which dependencies this app uses.
 
-***This application is build for MacOS and will likely not work on Linux due to its dependecy on Homebrew***
-### Update on Linux Compatibility
-#### v1.1.3
-Added initial compatibility layer via a dedicated linux script for debian like systems (in subdirectory linux/).
+#### Alternative Install - MacOS (from terminal)
+```bash
+curl https://raw.githubusercontent.com/amoreaulemay/batch-image-webp/main/macos/jpeg2webp --output jpeg2webp
+chmod u+x jpeg2webp
+```
 
-#### v1.1.1
-~~As of v1.1.1, the script does not run on Ubuntu 21.04 (at least in my tests). Script run into issues trying to install Homebrew. Although I could only test it as a root user on a linode server, so that could be the issue. Check the issue tab for more details, or if you want to contribute.~~
+### Linux (Debian-like)
+Download the script in the Linux directory. The script will install its required dependencies on the initial run. **Note :** This app requires sudo access to install its dependencies. If you want to run it as a non-admin user, you must first ask the sys-admin to install the required dependencies. See below for which dependencies this app uses.
+
+#### Alternative Install - Linux (from terminal)
+```bash
+curl https://raw.githubusercontent.com/amoreaulemay/batch-image-webp/main/linux/jpeg2webp --output jpeg2webp
+chmod u+x jpeg2webp
+```
 
 ## Use
 You can launch the script without argument, the script will ask for the path.
@@ -102,7 +110,7 @@ And the file *album.json* would contain the following :
 }
 ```
 
-## Dependencies
+## Dependencies (MacOS)
 
 1. [Homebrew](https://brew.sh/)
 2. [NodeJS](https://nodejs.org/en/)
@@ -111,3 +119,9 @@ And the file *album.json* would contain the following :
 5. [ImageMagick](https://formulae.brew.sh/formula/imagemagick#default)
 6. [spinner.sh](https://github.com/tlatsas/bash-spinner/blob/master/spinner.sh) (*embedded*)
 7. [webp-converter-cli](https://www.npmjs.com/package/webp-converter-cli)
+
+## Dependencies (Linux-Debian)
+
+1. [ImageMagick](https://formulae.brew.sh/formula/imagemagick#default)
+2. [coreutils](https://www.gnu.org/software/coreutils/)
+3. [spinner.sh](https://github.com/tlatsas/bash-spinner/blob/master/spinner.sh) (*embedded*)

@@ -1,7 +1,7 @@
-# batch-image-webp
+# Web Images - Album Creator
 Batch converts images to webp and resize them for responsive web.
 
-The script renames all images with random UUID, resize the images (with longest border) to 500, 1000, 1500 and 2000, then convert them to webp. Finally it moves the original in a folder, the minified jpegs in another folder, and the webp in another folder.
+The script renames all images with random UUID, resize the images (with longest border) to 500, 1000, 1500 and 2000, then convert them to webp. Then it moves the original in a folder, the minified jpegs in another folder, and the webp in another folder. Finally it creates a file "album.json" with all the album's info for rapid web deployment.
 
 ## Install
 ### MacOS

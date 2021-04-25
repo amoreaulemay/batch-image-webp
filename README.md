@@ -47,7 +47,7 @@ Once the PowerShell is open, run the following command:
 ```powershell
 Get-ExecutionPolicy
 ```
-If the policy is already set to "Unrestricted", skip to [Use](.#Use).
+If the policy is already set to "Unrestricted", skip to [Use](#Use).
 ##### Step 2: Change the execution policy
 If the policy is not Unrestricted, run the following command:
 ```powershell

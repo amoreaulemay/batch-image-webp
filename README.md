@@ -54,6 +54,12 @@ If the policy is not Unrestricted, run the following command:
 Set-ExecutionPolicy Unrestricted
 ```
 And answer "Y" to the security question. **Note:** Make sure you run PowerShell as an administrator, or this step will not work.
+
+<ins>**Word of warning:**</ins> Allowing your computer to execute script as Unrestricted is a potential security risk. I would strongly suggest you to review the source code of this project and use the self-signed method instead. You could also set the execution policy as current process only to only change it once, and redo that every time you want to run this script. To do this, run the following command:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
+```
+
 #### Method 2: Self sign the script
 The method for self-signing a script is well documented on Microsoft's Technet website, which you can consult [here](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_signing?view=powershell-7.1#create-a-self-signed-certificate).
 

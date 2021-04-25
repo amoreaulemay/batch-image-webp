@@ -34,7 +34,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/amoreaulemay/batch-ima
 ```
 
 ##### Word of caution (PowerShell)
-***In either cases, I would highly recommend you to review the code yourself and make sure you know what you are doing.*** While this script was tested for development purposes on a Windows machine, it has not been tested in a production environment. You understand that it is provided without any guaranties or liabilities. You understand that this script install its required dependencies on your machine and that it will manipulate files on your computer in order to perform its task.
+***In either cases, I would highly recommend you to review the code yourself and make sure you know what you are doing.*** While this script was tested for development purposes on a Windows machine, it has not been tested in a production environment. *You understand that it is provided without any guaranties or liabilities. You understand that this script install its required dependencies on your machine and that it will manipulate files on your computer in order to perform its task.*
 
 #### Method 1: Execute the script with unrestricted execution policy
 ##### Step 1: Check if the execution policy is already set to unrestricted

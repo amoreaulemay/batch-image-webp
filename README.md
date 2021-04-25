@@ -90,7 +90,7 @@ This script works in ***bash only***. As it currently is, the script fails in a 
 This is before the script
 
 ```
-parent_folder/
+album_folder/
 ├─ image1.jpg
 ├─ image2.jpg
 ├─ image3.jpg
@@ -99,7 +99,7 @@ parent_folder/
 And this is after
 
 ```
-parent_folder/
+album_folder/
 ├─ jpeg/
 │  ├─ 9F721D48-2DF3-4570-8744-0790C3577454-500.jpg
 │  ├─ 9F721D48-2DF3-4570-8744-0790C3577454-1000.jpg

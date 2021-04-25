@@ -55,7 +55,7 @@ Set-ExecutionPolicy Unrestricted
 ```
 And answer "Y" to the security question. **Note:** Make sure you run PowerShell as an administrator, or this step will not work.
 
-<ins>**Word of warning:**</ins> Allowing your computer to execute script as Unrestricted is a potential security risk. I would strongly suggest you to review the source code of this project and use the self-signed method instead. You could also set the execution policy as current process only to only change it once, and redo that every time you want to run this script. To do this, run the following command:
+<ins>**Word of warning:**</ins> Allowing your computer to execute script as Unrestricted is a potential security risk. I would strongly suggest you to review the source code of this project and use the self-signed method instead. You could also set the execution policy scope to the current process to only change it once, and redo that every time you want to run this script. To do this, run the following command:
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
 ```

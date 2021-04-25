@@ -22,7 +22,37 @@ curl https://raw.githubusercontent.com/amoreaulemay/batch-image-webp/main/linux/
 chmod u+x jpeg2webp
 ```
 
+### Windows (PowerShell)
+Download the script in the Windows directory. The script will install its required dependencies on the initial run. **Note :** This script is unsigned. This is due to the fact that a public authority signature would cost about 200$ a year to get. You therefore have to options to run the script.
+1. Set the execution policy to unrestricted; or
+2. Self sign the script.
+
+##### Word of caution (PowerShell)
+***In either cases, I would highly recommend you to review the code yourself and make sure you know what you are doing.*** While this script was tested for development purposes on a Windows machine, it has not been tested in a production environment. You understand that it is provided without any guaranties or liabilities. You understand that this script install its required dependencies on your machine and that it will manipulate files on your computer in order to perform its task.
+
+#### Method 1: Execute the script with unrestricted execution policy
+##### Step 1: Check if the execution policy is already set to unrestricted
+Open the start menu and search for "Powershell" and click on "Run as administrator" (see picture)
+<p align="center">
+   <img src="https://i.imgur.com/YvRGDCp.png" width="380">
+</p>
+
+Once the PowerShell is open, run the following command:
+```powershell
+Get-ExecutionPolicy
+```
+If the policy is already set to "Unrestricted", skip to [Use](.#Use).
+##### Step 2: Change the execution policy
+If the policy is not Unrestricted, run the following command:
+```powershell
+Set-ExecutionPolicy Unrestricted
+```
+And answer "Y" to the security question. **Note:** Make sure you run PowerShell as an administrator, or this step will not work.
+#### Method 2: Self sign the script
+The method for self-signing a script is well documented on Microsoft's Technet website, which you can consult [here](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_signing?view=powershell-7.1#create-a-self-signed-certificate).
+
 ## Use
+### MacOS and Linux
 You can launch the script without argument, the script will ask for the path.
 
 ```bash
@@ -34,9 +64,14 @@ Or you can provide the path as an argument
 ```bash
 bash jpeg2webp /path/to/folder
 ```
+### Windows
+Navigate to the folder in PowerShell and launch the command:
+```powershell
+.\jpeg2webp.ps1
+```
 
-### Word of Caution
-This script works in ***bash only***. As it currently is, the script fails in a zsh interpreter. ~~This is currently being investigated.~~
+### Word of Caution (MacOS and Linux)
+This script works in ***bash only***. As it currently is, the script fails in a zsh interpreter.
 
 ## Example
 

@@ -24,8 +24,8 @@ chmod u+x jpeg2webp
 
 ### Windows (PowerShell)
 Download the script in the Windows directory. The script will install its required dependencies on the initial run. **Note :** This script is unsigned. This is due to the fact that a public authority signature would cost about 200$ a year to get. You therefore have to options to run the script.
-1. Set the execution policy to unrestricted; or
-2. Self sign the script.
+1. [Set the execution policy to unrestricted](#method-1-execute-the-script-with-unrestricted-execution-policy); or
+2. [Self sign the script](#method-2-self-sign-the-script).
 
 #### Alternative Install - Windows (from PowerShell)
 To download the latest script version from the PowerShell terminal, run this command:

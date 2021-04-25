@@ -187,13 +187,13 @@ foreach ($file in Get-ChildItem) {
 
     Move-Item -Path $file -Destination $new_file | Out-Null
     & $convert ($new_file,'-resize','2000x2000','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72',"$guid_name-2000$extension")
-    & $convert ($new_file,'-resize','1500x1500','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72',"$guid_name-1500$extension")
-    & $convert ($new_file,'-resize','1000x1000','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72',"$guid_name-1000$extension")
-    & $convert ($new_file,'-resize','500x500','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72',"$guid_name-500$extension")
-    & $convert ($new_file,'-resize','2000x2000','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72','-define','webp:lossless=true',"$guid_name-2000.webp")
-    & $convert ($new_file,'-resize','1500x1500','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72','-define','webp:lossless=true',"$guid_name-1500.webp")
-    & $convert ($new_file,'-resize','1000x1000','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72','-define','webp:lossless=true',"$guid_name-1000.webp")
-    & $convert ($new_file,'-resize','500x500','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72','-define','webp:lossless=true',"$guid_name-500.webp")
+    & $convert ("$guid_name-2000$extension",'-resize','1500x1500','-interlace','Plane',"$guid_name-1500$extension")
+    & $convert ("$guid_name-1500$extension",'-resize','1000x1000','-interlace','Plane',"$guid_name-1000$extension")
+    & $convert ("$guid_name-1000$extension",'-resize','500x500','-interlace','Plane',"$guid_name-500$extension")
+    & $convert ("$guid_name-2000$extension",'-define','webp:lossless=true',"$guid_name-2000.webp")
+    & $convert ("$guid_name-2000.webp",'-resize','1500x1500','-interlace','Plane',"$guid_name-1500.webp")
+    & $convert ("$guid_name-1500.webp",'-resize','1000x1000','-interlace','Plane',"$guid_name-1000.webp")
+    & $convert ("$guid_name-1000.webp",'-resize','500x500','-interlace','Plane',"$guid_name-500.webp")
     Move-Item -Path $new_file -Destination ../originals/
     $i = $i + 1
 }

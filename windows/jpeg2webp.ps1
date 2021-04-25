@@ -1,6 +1,7 @@
 param ($f)
 
 $init_location = Get-Location
+$VERSION = "v1.1.6"
 
 # pragma FUNCTIONS
 function CheckChocoModule {
@@ -40,7 +41,7 @@ Function Get-File($initialDirectory=[Environment]::GetFolderPath('Desktop'))
 # License : AGPL-3.0 License
 
 Clear-Host
-Write-Host "Batch WebP Converter v1.1.5 - Windows (PowerShell)"
+Write-Host "Batch WebP Converter $VERSION - Windows (PowerShell)"
 Write-Host "Copyright (c) Alexandre Moreau-Lemay 2021."
 Write-Host "Released under the AGPLv3 License.`n`n`n"
 
@@ -164,12 +165,14 @@ Set-Location -Path $temp_folder
 $convert = "C:\ProgramData\chocolatey\bin\convert.exe"
 
 $number_of_file = (Get-Item * | Measure-Object).Count
+$resulting_amount_of_file = $number_of_file * 8
+$j = 0
 $i = 1
 
 Clear-Host
 
 foreach ($file in Get-ChildItem) {
-    Write-Progress -Activity "Converting, this might take a few minutes..." -PercentComplete -1
+    Write-Progress -Activity "Converting, this might take a few minutes..." -PercentComplete ([math]::Round((($j / $resulting_amount_of_file) * 100)))
     $extension = ($file | Select-Object Extension).Extension
     
     $guid_name = [System.guid]::NewGuid().toString()
@@ -186,14 +189,14 @@ foreach ($file in Get-ChildItem) {
     }
 
     Move-Item -Path $file -Destination $new_file | Out-Null
-    & $convert ($new_file,'-resize','2000x2000','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72',"$guid_name-2000$extension")
-    & $convert ("$guid_name-2000$extension",'-resize','1500x1500','-interlace','Plane',"$guid_name-1500$extension")
-    & $convert ("$guid_name-1500$extension",'-resize','1000x1000','-interlace','Plane',"$guid_name-1000$extension")
-    & $convert ("$guid_name-1000$extension",'-resize','500x500','-interlace','Plane',"$guid_name-500$extension")
-    & $convert ("$guid_name-2000$extension",'-define','webp:lossless=true',"$guid_name-2000.webp")
-    & $convert ("$guid_name-2000.webp",'-resize','1500x1500','-interlace','Plane',"$guid_name-1500.webp")
-    & $convert ("$guid_name-1500.webp",'-resize','1000x1000','-interlace','Plane',"$guid_name-1000.webp")
-    & $convert ("$guid_name-1000.webp",'-resize','500x500','-interlace','Plane',"$guid_name-500.webp")
+    & $convert ($new_file,'-resize','2000x2000','-interlace','Plane','-gaussian-blur','0.05','-quality','80','-density','72',"$guid_name-2000$extension"); $j++
+    & $convert ("$guid_name-2000$extension",'-resize','1500x1500','-interlace','Plane',"$guid_name-1500$extension"); $j++
+    & $convert ("$guid_name-1500$extension",'-resize','1000x1000','-interlace','Plane',"$guid_name-1000$extension"); $j++
+    & $convert ("$guid_name-1000$extension",'-resize','500x500','-interlace','Plane',"$guid_name-500$extension"); $j++
+    & $convert ("$guid_name-2000$extension",'-define','webp:emulate-jpeg-size=true',"$guid_name-2000.webp"); $j++
+    & $convert ("$guid_name-2000.webp",'-resize','1500x1500','-interlace','Plane',"$guid_name-1500.webp"); $j++
+    & $convert ("$guid_name-1500.webp",'-resize','1000x1000','-interlace','Plane',"$guid_name-1000.webp"); $j++
+    & $convert ("$guid_name-1000.webp",'-resize','500x500','-interlace','Plane',"$guid_name-500.webp"); $j++
     Move-Item -Path $new_file -Destination ../originals/
     $i = $i + 1
 }

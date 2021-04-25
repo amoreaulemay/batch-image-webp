@@ -154,8 +154,7 @@ New-Item -Name "album.json" -ItemType "file" | Out-Null
 ) | Out-File -FilePath "album.json" -Append
 
 # pragma 9. Moving jpgs to the temporary directory
-Get-Item *.jpg | Move-Item -Destination $temp_folder | Out-Null
-Get-Item *.jpeg | Move-Item -Destination $temp_folder | Out-Null
+Get-Item * -Include *.jpg,*.jpeg | Move-Item -Destination $temp_folder | Out-Null
 
 # pragma 10. Changing directory to the temporary one
 Set-Location -Path $temp_folder
@@ -213,8 +212,7 @@ foreach ($file in Get-ChildItem) {
 ) | Out-File -FilePath ../album.json -Append
 
 # pragma 13. Moving the files to their final destinations
-Get-Item *.jpg | Move-Item -Destination ../jpeg/ | Out-Null
-Get-Item *.jpeg | Move-Item -Destination ../jpeg/ | Out-Null
+Get-Item * -Include *.jpg,*.jpeg | Move-Item -Destination ../jpeg/ | Out-Null
 Get-Item *.webp | Move-Item -Destination ../webp/ | Out-Null
 
 # pragma 14. Deleting the temp directory

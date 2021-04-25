@@ -27,6 +27,12 @@ Download the script in the Windows directory. The script will install its requir
 1. Set the execution policy to unrestricted; or
 2. Self sign the script.
 
+#### Alternative Install - Windows (from PowerShell)
+To download the latest script version from the PowerShell terminal, run this command:
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/amoreaulemay/batch-image-webp/main/windows/jpeg2webp.ps1" -Outfile "jpeg2webp.ps1"
+```
+
 ##### Word of caution (PowerShell)
 ***In either cases, I would highly recommend you to review the code yourself and make sure you know what you are doing.*** While this script was tested for development purposes on a Windows machine, it has not been tested in a production environment. You understand that it is provided without any guaranties or liabilities. You understand that this script install its required dependencies on your machine and that it will manipulate files on your computer in order to perform its task.
 

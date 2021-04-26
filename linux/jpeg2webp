@@ -1,5 +1,7 @@
 #!/bin/bash
 
+VERSION="v1.1.6"
+
 # pragma SPINNER.SH
 # Author: Tasos Latsas
 
@@ -73,9 +75,12 @@ function stop_spinner {
 
 bold=$(tput bold)
 normal=$(tput sgr0)
+green="\e[32m"
+red="\e[31m"
+nc="\e[0m"
 
 clear
-printf "%bBatch WebP converter v.1.1.3b - Linux (debian-like)%b\n" "$bold" "$normal"
+printf "%bBatch WebP converter %s - Linux (debian-like)%b\n" "$bold" "$VERSION" "$normal"
 printf "Copyright (c) Alexandre Moreau-Lemay 2021.\n"
 printf "Released under the AGPLv3 License.\n\n\n"
 sleep 1
@@ -118,8 +123,6 @@ stop_spinner $?
 # pragma 4. Getting the path of the conversion
 if [ $# -eq 0 ]; then
     path=$(zenity --file-selection --directory)
-    # printf "7. Please enter the path for the directory with the files.\n"
-    # read -r path
 else
     path="$1"
 fi
@@ -139,8 +142,16 @@ read -r ALBUM_NAME
 printf "Enter a description for the album: "
 read -r ALBUM_DESCRIPTION
 
-printf "Enter the year of the album: "
-read -r ALBUM_YEAR
+until ! [[ "$ALBUM_YEAR" -eq 0 ]]
+do
+    printf "Enter the year of the album: "
+    read -r ALBUM_YEAR_TEMP
+    if ! [[ "$ALBUM_YEAR_TEMP" =~ ^-?[0-9]+$ ]]; then
+        printf "%bPlease enter a numerical value!%b\n" "$red" "$nc"
+    else
+        ALBUM_YEAR="$ALBUM_YEAR_TEMP"
+    fi
+done
 
 printf "Enter the city of the album: "
 read -r ALBUM_CITY
@@ -150,22 +161,7 @@ read -r ALBUM_COUNTRY
 
 # pragma 7. Select the album cover
 function album_cover() {
-    while :
-    do
-        printf "Please provide the name of the file (including the extension) : "
-        read -r COVER_FILE_NAME
-        if [ ! -f "$COVER_FILE_NAME" ]; then
-            printf "Error: The file name provided does not exist. Would you like to try again? [y/n] : "
-            read -r ALBUM_COVER_TRY_AGAIN
-            if [ "$ALBUM_COVER_TRY_AGAIN" = "n" ] || [ "$ALBUM_COVER_TRY_AGAIN" = "N" ]; then
-                printf "The program will therefore choose a random file.\n"
-                random_album_cover
-                break
-            fi
-        else
-            break
-        fi
-    done
+    COVER_FILE_NAME=$(basename "$(zenity --file-selection --file-filter="Images | *.jpg *.jpeg")")
 }
 
 function random_album_cover() {
@@ -176,20 +172,13 @@ while :
 do
     printf "Do you wish to set a cover image for the album? If none is set, it will be randomly generated. [y/n] : "
     read -r _SET_ALBUM_COVER
-    case "$_SET_ALBUM_COVER" in
+    SET_ALBUM_COVER_LOWER=$(tr '[:upper:]' '[:lower:]' <<< "$_SET_ALBUM_COVER")
+    case "$SET_ALBUM_COVER_LOWER" in
         "y")
             album_cover
             break
             ;;
-        "Y")
-            album_cover
-            break
-            ;;
         "n")
-            random_album_cover
-            break
-            ;;
-        "N")
             random_album_cover
             break
             ;;
@@ -235,14 +224,18 @@ do
         mv "$FILE" "$ID"."$EXTENSION"
         NEW_FILE="$ID"."$EXTENSION"
         printf "        \"%s\",\n" "$ID" >> ../album.json
+        # JPEG resizing
         convert "$NEW_FILE" -resize 2000x2000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-2000.$EXTENSION"
-        convert "$NEW_FILE" -resize 2000x2000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80 -density 72 -define webp:lossless=true "$ID-2000.webp"
-        convert "$NEW_FILE" -resize 1500x1500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1500.$EXTENSION"
-        convert "$NEW_FILE" -resize 1500x1500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80 -density 72 -define webp:lossless=true "$ID-1500.webp"
-        convert "$NEW_FILE" -resize 1000x1000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-1000.$EXTENSION"
-        convert "$NEW_FILE" -resize 1000x1000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80 -density 72 -define webp:lossless=true "$ID-1000.webp"
-        convert "$NEW_FILE" -resize 500x500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-500.$EXTENSION"
-        convert "$NEW_FILE" -resize 500x500\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80 -density 72 -define webp:lossless=true "$ID-500.webp"
+        convert "$ID-2000.$EXTENSION" -resize 1500x1500\> "$ID-1500.$EXTENSION"
+        convert "$ID-1500.$EXTENSION" -resize 1000x1000\> "$ID-1000.$EXTENSION"
+        convert "$ID-1000.$EXTENSION" -resize 500x500\> "$ID-500.$EXTENSION"
+
+        # WebP conversion
+        convert "$ID-2000.$EXTENSION" -define webp:emulate-jpeg-size=true "$ID-2000.webp"
+        convert "$ID-1500.$EXTENSION" -define webp:emulate-jpeg-size=true "$ID-1500.webp"
+        convert "$ID-1000.$EXTENSION" -define webp:emulate-jpeg-size=true "$ID-1000.webp"
+        convert "$ID-500.$EXTENSION" -define webp:emulate-jpeg-size=true "$ID-500.webp"
+
         mv -n "$NEW_FILE" ../originals/
     fi
 done

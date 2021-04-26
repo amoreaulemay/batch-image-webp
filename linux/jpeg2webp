@@ -10,7 +10,7 @@ if grep -q Microsoft /proc/version; then
         printf "\e[31mYou are running this program under a Windows Subsystem for Linux.\e[0m\n\n"
         printf "In order to work, make sure you have a XForm server installed to run GTK applications. During development, it was tested successfully with Xming, which you can download at https://www.straightrunning.com/XmingNotes/.\n"
         printf "Press any key to continue...\n"
-        read -t 3 -n 1
+        read -t 30 -n 1
         if [ $? = 0 ]; then
             break
         fi

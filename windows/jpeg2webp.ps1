@@ -4,7 +4,7 @@ $init_location = Get-Location
 $VERSION = "v1.1.6"
 
 # pragma CHECKING OS
-if($true -ne $IsWindows){
+if((Get-ChildItem -Path Env:OS).Value -ne "Windows_NT"){
     Clear-Host
     Write-Host "Sorry, this script is meant to be executed on Windows only. Please visit https://github.com/amoreaulemay/batch-image-webp and download the script corresponding to your O.S. version.`n`n" -ForegroundColor Red
     exit

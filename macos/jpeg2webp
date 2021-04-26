@@ -137,8 +137,6 @@ sleep 1
 # pragma 7. Getting the path of the conversion
 if [ $# -eq 0 ]; then
     path=$(zenity --file-selection --directory)
-    # printf "7. Please enter the path for the directory with the files.\n"
-    # read -r path
 else
     path="$1"
 fi

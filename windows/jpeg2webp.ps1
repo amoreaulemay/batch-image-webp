@@ -1,21 +1,14 @@
 param ($f)
 
 $init_location = Get-Location
-$VERSION = "v1.1.6"
-
-# pragma CHECKING OS
-if((Get-ChildItem -Path Env:OS).Value -ne "Windows_NT"){
-    Clear-Host
-    Write-Host "Sorry, this script is meant to be executed on Windows only. Please visit https://github.com/amoreaulemay/batch-image-webp and download the script corresponding to your O.S. version.`n`n" -ForegroundColor Red
-    exit
-}
+$VERSION = "v1.1.7"
 
 # pragma FUNCTIONS
 function CheckChocoModule {
     param (
         [Parameter(Mandatory=$true)][string]$module
     )
-    
+
     return choco list -lo | Where-object { $_.ToLower().StartsWith($module.ToLower()) }
 }
 Function Get-Folder($initialDirectory="")
@@ -51,6 +44,26 @@ Clear-Host
 Write-Host "Batch WebP Converter $VERSION - Windows (PowerShell)"
 Write-Host "Copyright (c) Alexandre Moreau-Lemay 2021."
 Write-Host "Released under the AGPLv3 License.`n`n`n"
+
+# pragma CHECKING OS
+$os_error_message = "Sorry, this script is meant to be executed on Windows only. Please visit https://github.com/amoreaulemay/batch-image-webp and download the script corresponding to your O.S. version.`n`n"
+if($PSVersionTable.PSVersion.Major -lt "7"){
+    try {
+        if((Get-ChildItem -Path Env:OS -ErrorAction Stop).Value -ne "Windows_NT"){
+            Write-Host $os_error_message -ForegroundColor Red
+            exit
+        }
+    } catch [System.Management.Automation.ItemNotFoundException] {
+        # Env:OS does not exist, meaning not on a Windows NT system
+        Write-Host $os_error_message -ForegroundColor Red
+        exit
+    }
+} else {
+    if($true -ne $IsWindows){
+        Write-Host $os_error_message -ForegroundColor Red
+        exit
+    }
+}
 
 # pragma DEPENDENCIES
 # pragma 1. Making sure chocolatey is installed.
@@ -181,7 +194,7 @@ Clear-Host
 foreach ($file in Get-ChildItem) {
     Write-Progress -Activity "Converting, this might take a few minutes..." -PercentComplete ([math]::Round((($j / $resulting_amount_of_file) * 100)))
     $extension = ($file | Select-Object Extension).Extension
-    
+
     $guid_name = [System.guid]::NewGuid().toString()
     if((Split-Path $file -Leaf) -eq $album_cover){
         $cover = $guid_name

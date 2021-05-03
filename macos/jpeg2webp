@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.1.6"
+VERSION="v1.1.7"
 
 # pragma SPINNER.SH
 # Author: Tasos Latsas
@@ -84,6 +84,12 @@ printf "Copyright (c) Alexandre Moreau-Lemay 2021.\n"
 printf "Released under the AGPLv3 License.\n\n\n"
 sleep 1
 
+# pragma OS Detection
+if ! [[ "$OSTYPE" =~ "darwin" ]]; then
+    printf "%bSorry, this script is meant to be executed on MacOS only. Please visit https://github.com/amoreaulemay/batch-image-webp and download the script corresponding to your O.S. version.%b\n\n" "$red" "$nc"
+    exit 1
+fi
+
 # pragma 1. Check if Homebrew is installed
 start_spinner "1. Making sure HomeBrew is installed."
 if ! which brew > /dev/null ; then
@@ -117,31 +123,14 @@ fi
 stop_spinner $?
 sleep 1
 
-# pragma 5. Make sure NodeJS (with NPM) is installed
-start_spinner "5. Making sure NodeJS is installed."
-if ! which node > /dev/null ; then
-    brew install node
-fi
-stop_spinner $?
-sleep 1
-
-# pragma 6. Make sure the jpeg converter script is installed
-start_spinner "6. Making sure WebP Converter CLI is installed."
-if ! npm list -g | grep webp-converter-cli > /dev/null ; then
-    printf "The webp converter is not installed. To install it, please enter your password.\n"
-    sudo npm install -g webp-converter-cli
-fi
-stop_spinner $?
-sleep 1
-
-# pragma 7. Getting the path of the conversion
+# pragma 5. Getting the path of the conversion
 if [ $# -eq 0 ]; then
     path=$(zenity --file-selection --directory)
 else
     path="$1"
 fi
 
-# pragma 8. Check if the directory exists and move to the directory if it does
+# pragma 6. Check if the directory exists and move to the directory if it does
 if [ ! -d "$path" ]; then
     printf "\e[31mThe path is invalid!\e[0m\n"
     exit 1
@@ -149,7 +138,7 @@ else
     cd "$path" || exit
 fi
 
-# pragma 9. Infos about the album
+# pragma 7. Infos about the album
 printf "Enter the name of the album: "
 read -r ALBUM_NAME
 
@@ -173,7 +162,7 @@ read -r ALBUM_CITY
 printf "Enter the country of the album: "
 read -r ALBUM_COUNTRY
 
-# pragma 10. Select the album cover
+# pragma 8. Select the album cover
 function album_cover() {
     COVER_FILE_NAME=$(basename "$(zenity --file-selection --file-filter="Images | *.jpg *.jpeg")")
 }
@@ -202,7 +191,7 @@ do
     esac
 done
 
-# pragma 11. Making the base of the json file
+# pragma 9. Making the base of the json file
 touch album.json
 {
     printf "{\n"
@@ -214,14 +203,14 @@ touch album.json
     printf "    \"pictures\":[\n"
 } >> album.json
 
-# pragma 12. Making the two permanent directories and one temporary one
+# pragma 10. Making the two permanent directories and one temporary one
 TEMP=$(uuidgen)
 mkdir -p webp
 mkdir -p jpeg
 mkdir -p originals
 mkdir "$TEMP"
 
-# pragma 13. Executing the conversion script
+# pragma 11. Executing the conversion script
 mv -n ./*.jpg "$TEMP"/
 mv -n ./*.jpeg "$TEMP"/ 2>/dev/null
 cd "$TEMP"/ || exit
@@ -238,16 +227,23 @@ do
         mv "$FILE" "$ID"."$EXTENSION"
         NEW_FILE="$ID"."$EXTENSION"
         printf "        \"%s\",\n" "$ID" >> ../album.json
+        # JPEG resizing
         convert "$NEW_FILE" -resize 2000x2000\> -strip -interlace Plane -gaussian-blur 0.05 -quality 80% -density 72 "$ID-2000.$EXTENSION"
-        convert "$ID-2000.$EXTENSION" -resize 1500x1500\> -interlace Plane "$ID-1500.$EXTENSION"
-        convert "$ID-1500.$EXTENSION" -resize 1000x1000\> -interlace Plane "$ID-1000.$EXTENSION"
-        convert "$ID-1000.$EXTENSION" -resize 500x500\> -interlace Plane "$ID-500.$EXTENSION"
+        convert "$ID-2000.$EXTENSION" -resize 1500x1500\> "$ID-1500.$EXTENSION"
+        convert "$ID-1500.$EXTENSION" -resize 1000x1000\> "$ID-1000.$EXTENSION"
+        convert "$ID-1000.$EXTENSION" -resize 500x500\> "$ID-500.$EXTENSION"
+
+        # WebP conversion
+        convert "$ID-2000.$EXTENSION" -define webp:emulate-jpeg-size=true "$ID-2000.webp"
+        convert "$ID-1500.$EXTENSION" -define webp:emulate-jpeg-size=true "$ID-1500.webp"
+        convert "$ID-1000.$EXTENSION" -define webp:emulate-jpeg-size=true "$ID-1000.webp"
+        convert "$ID-500.$EXTENSION" -define webp:emulate-jpeg-size=true "$ID-500.webp"
         mv -n "$NEW_FILE" ../originals/
     fi
 done
 stop_spinner $?
 
-# pragma 14. Closing the album.json file and removing the last comma and line break from the loop
+# pragma 12. Closing the album.json file and removing the last comma and line break from the loop
 if [ -n "$(tail -c1 ../album.json)" ]; then
     # If the file has not a trailing new line.
     # Remove one char as the question request.
@@ -271,17 +267,14 @@ fi
     printf "}"
 } >> ../album.json
 
-# pragma 15. Converting to webp
-webpc -r
-
-# pragma 16. Copying the files in their right directories
+# pragma 13. Copying the files in their right directories
 start_spinner 'Copying files...'
 mv -n ./*.jpg ../jpeg/
 mv -n ./*.jpeg ../jpeg/ 2>/dev/null
 mv -n ./*.webp ../webp/
 stop_spinner $?
 
-# pragma 17. Removing the temporary directory
+# pragma 14. Removing the temporary directory
 
 # Added a sleep 5 because without it the script sometimes causes an issue where the temporary directory would not be deleted.
 sleep 5
@@ -289,7 +282,7 @@ sleep 5
 cd ../
 rm -r ./"$TEMP"
 
-# pragma 18. Exiting the script
+# pragma 15. Exiting the script
 clear
 printf "\033[0;32mScript has executed!\e[0m\n"
 exit 0

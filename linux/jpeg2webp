@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="v1.1.6"
+VERSION="v1.1.7"
 
 ## CHECKING IF WSL (needs a XForm server to run Zenity)
 if grep -q Microsoft /proc/version; then
